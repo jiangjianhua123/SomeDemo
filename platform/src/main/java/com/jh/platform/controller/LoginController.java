@@ -7,6 +7,8 @@ import com.jh.platform.model.User;
 import com.jh.platform.util.PasswordHelper;
 import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
+import org.springframework.data.redis.core.RedisTemplate;
+import org.springframework.data.redis.core.StringRedisTemplate;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
@@ -25,6 +27,13 @@ public class LoginController extends BaseController {
     @Autowired
     private LogUserMapper logUserMapper;
 
+    @Autowired
+    private StringRedisTemplate template;
+
+    private RedisTemplate redisTemplate;
+
+
+
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
         LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
@@ -35,8 +44,6 @@ public class LoginController extends BaseController {
             loginResult.setCode(40001);
             return encryptResponseData(loginResult);
         }
-
-
 
 
         return "jainghong";
