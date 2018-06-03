@@ -7,24 +7,55 @@ package com.jh.platform.controller.vo;
  **/
 public class LoginVO extends BaseVO {
 
-    private String name;
+    /**
+     *  用户名（主持人使用YY号）
+     */
+    private String usercode;
 
-    private String pwd;
+    /**
+     * 密码
+     */
+    private String password;
 
+    /**
+     * 机器码
+     */
+    private String hardwareCode;
 
-    public String getName() {
-        return name;
+    /**
+     * 客户端版本号
+     */
+    private String clientsVersion;
+
+    public String getUsercode() {
+        return usercode;
     }
 
-    public void setName(String name) {
-        this.name = name;
+    public void setUsercode(String usercode) {
+        this.usercode = usercode;
     }
 
-    public String getPwd() {
-        return pwd;
+    public String getPassword() {
+        return password;
     }
 
-    public void setPwd(String pwd) {
-        this.pwd = pwd;
+    public void setPassword(String password) {
+        this.password = password;
+    }
+
+    public String getHardwareCode() {
+        return hardwareCode;
+    }
+
+    public void setHardwareCode(String hardwareCode) {
+        this.hardwareCode = hardwareCode;
+    }
+
+    public String getClientsVersion() {
+        return clientsVersion;
+    }
+
+    public void setClientsVersion(String clientsVersion) {
+        this.clientsVersion = clientsVersion;
     }
 }

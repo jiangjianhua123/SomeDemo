@@ -28,9 +28,9 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
         LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
-        User user = logUserMapper.findUserByName(loginVO.getName());
+        User user = logUserMapper.findUserByName(loginVO.getUsercode());
         //user or pass is wrong
-        if (user == null||!StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPwd(), user.getCredentialsSalt()), user.getPassword())) {
+        if (user == null||!StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
             loginResult.setResult("error");
             loginResult.setCode(40001);
             return encryptResponseData(loginResult);
