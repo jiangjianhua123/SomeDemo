@@ -65,7 +65,7 @@ public class HttpClientUtil {
                 throw new Exception("missing post String");
             }
 
-            StringEntity stringEntity = new StringEntity(postString.toString(), utf8Charset);
+            StringEntity stringEntity = new StringEntity(postString, utf8Charset);
             stringEntity.setContentEncoding("UTF-8");
             stringEntity.setContentType("application/json");
             httpPost.setEntity(stringEntity);

@@ -1,7 +1,7 @@
 package com.jjh.springboot.filter;
 
 import com.jjh.springboot.util.HttpClientUtil.HttpClientUtil;
-import com.jjh.springboot.util.LoginComponent;
+import com.jjh.springboot.controller.LoginComponent;
 import org.apache.catalina.filters.RemoteIpFilter;
 import org.apache.commons.io.IOUtils;
 import org.slf4j.Logger;

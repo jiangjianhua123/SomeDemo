@@ -1,6 +1,7 @@
-package com.jjh.springboot.util;
+package com.jjh.springboot.controller;
 
 import com.alibaba.fastjson.JSONObject;
+import com.jjh.springboot.util.Constant;
 import com.jjh.springboot.util.HttpClientUtil.HttpClientUtil;
 import org.slf4j.Logger;
 import org.slf4j.LoggerFactory;
