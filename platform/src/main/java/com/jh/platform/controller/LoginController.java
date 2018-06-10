@@ -14,6 +14,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
 import java.util.Set;
 
 /**
@@ -34,30 +36,45 @@ public class LoginController extends BaseController {
     @Value("${oneday.error.times}")
     private int oneDayErrorTimes = 6;
 
-
-
-
+    @Value("${client.max-num}")
+    private int clientMaxNum = 3;
 
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
         LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
-        Set<String> keySets = template.keys(loginVO.getUsercode()+"-*");
-        if(keySets.size() >= oneDayErrorTimes){
-            return "";
-        }
-
-//        loginVO.getUsercode()+"-"+loginVO.getHardwareCode();
-
-        User user = logUserMapper.findUserByName(loginVO.getUsercode());
-        //user or pass is wrong
-        if (user == null||!StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
+        String tempKey = loginVO.getUsercode() + "-" + loginVO.getHardwareCode();
+        Set<String> keySets = template.keys(loginVO.getUsercode() + "-*");
+        //超过当前账号客户端最大数
+        if (StringUtils.isBlank(keySets.stream().filter(k -> k.startsWith(tempKey)).findFirst().get()) && keySets.size() >= clientMaxNum) {
             loginResult.setResult("error");
-            loginResult.setCode(40001);
+            loginResult.setCode(40004);
+            //return "超过当前账号客户端最大数";
             return encryptResponseData(loginResult);
         }
-
-        return "jainghong";
+        String tempKeyError = template.opsForValue().get("error-" +tempKey );
+        if (StringUtils.isNotBlank(tempKeyError) && Integer.parseInt(tempKeyError) > oneDayErrorTimes) {
+            //return "登陆失败次数过多，今天限制登陆。";
+            loginResult.setResult("error");
+            loginResult.setCode(40005);
+            return encryptResponseData(loginResult);
+        }
+        User user = logUserMapper.findUserByName(loginVO.getUsercode());
+        //user or pass is wrong
+        if (user == null || !StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
+            loginResult.setResult("error");
+            loginResult.setCode(40001);
+            if(StringUtils.isBlank(tempKeyError))   {
+                template.opsForValue().set("error-" +tempKey,"1",24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY));
+            }else {
+                template.opsForValue().increment("error-" +tempKey,1);
+            }
+            return encryptResponseData(loginResult);
+        }
+        template.opsForHash().hasKey(tempKey,user);
+        loginResult.setResult("success");
+        loginResult.setData(user);
+        return encryptResponseData(loginResult);
     }
 
 }
