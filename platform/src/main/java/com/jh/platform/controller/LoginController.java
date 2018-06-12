@@ -14,9 +14,11 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
 import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jianghong
@@ -44,9 +46,10 @@ public class LoginController extends BaseController {
     public String login(HttpServletRequest request, LoginResult loginResult) {
         LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
         String tempKey = loginVO.getUsercode() + "-" + loginVO.getHardwareCode();
+        String errorTempKey = "error-" +tempKey;
         Set<String> keySets = template.keys(loginVO.getUsercode() + "-*");
         //超过当前账号客户端最大数
-        if (StringUtils.isBlank(keySets.stream().filter(k -> k.startsWith(tempKey)).findFirst().get()) && keySets.size() >= clientMaxNum) {
+        if (!keySets.isEmpty()&&StringUtils.isBlank(keySets.stream().filter(k -> k.startsWith(tempKey)).findFirst().get()) && keySets.size() >= clientMaxNum) {
             loginResult.setResult("error");
             loginResult.setCode(40004);
             //return "超过当前账号客户端最大数";
@@ -65,13 +68,17 @@ public class LoginController extends BaseController {
             loginResult.setResult("error");
             loginResult.setCode(40001);
             if(StringUtils.isBlank(tempKeyError))   {
-                template.opsForValue().set("error-" +tempKey,"1",24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY));
+                template.opsForValue().set(errorTempKey,"1");
             }else {
-                template.opsForValue().increment("error-" +tempKey,1);
+                template.opsForValue().increment(errorTempKey,1);
             }
+            template.expire(errorTempKey, (24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)),TimeUnit.SECONDS);
             return encryptResponseData(loginResult);
         }
-        template.opsForHash().hasKey(tempKey,user);
+        template.opsForHash().put(tempKey,"usercode",user.getUsercode());
+        template.opsForHash().put(tempKey,"logintime",LocalDateTime.now().toString());
+        template.expire(tempKey, 5, TimeUnit.MINUTES);
+        template.delete(errorTempKey);
         loginResult.setResult("success");
         loginResult.setData(user);
         return encryptResponseData(loginResult);
