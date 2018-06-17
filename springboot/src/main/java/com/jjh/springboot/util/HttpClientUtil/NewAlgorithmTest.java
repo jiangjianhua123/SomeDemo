@@ -103,18 +103,10 @@ public class NewAlgorithmTest {
         return "";
     }
 
-    public static Stream<Path> subStream(Path path) {
-        try {
-            return Files.list(path);
-        } catch (IOException e) {
-
-        }
-        return null;
-    }
 
 
     public static void main(String[] args) throws Exception {
-        HttpClientUtil.SESSION_ID = "1099098391@DEFAULT";
+        HttpClientUtil.SSION_ID = "1099098391@DEFAULT";
         Path fpath=Paths.get("G:\\Desktop\\WORK\\新算法测试\\TestAll");
         //Path fpath = Paths.get("G:\\Desktop\\WORK\\新算法测试\\test");
 

@@ -1,7 +1,6 @@
 package util;
 
 import java.util.LinkedList;
-import java.util.Random;
 
 public class OperatorUtil {
 
@@ -70,15 +69,23 @@ public class OperatorUtil {
 //        for(int i=0;i<10000000;i++){
 //            tempList.add(IntStream.rangeClosed(1, 512).mapToObj(e->(float)e).toArray(Float[]::new));
 //        }
-        Random ra =new Random();
-        for(int i=0;i<512;i++){
-            if(ra.nextBoolean()){
-                System.err.println(ra.nextFloat());
-            }else{
-                System.err.println(-ra.nextFloat());
-            }
+//        Random ra =new Random();
+//        for(int i=0;i<512;i++){
+//            if(ra.nextBoolean()){
+//                System.err.println(ra.nextFloat());
+//            }else{
+//                System.err.println(-ra.nextFloat());
+//            }
+//
+//        }
+        byte temp = 1;
+        System.err.println(temp&0xff);
 
-        }
+        int i = 255;
+        System.err.println(i^0xff);
+
+
+
 
 
 //        tempList.parallelStream().map().collect(Collectors.toList())

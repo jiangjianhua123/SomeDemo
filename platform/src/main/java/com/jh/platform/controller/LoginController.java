@@ -1,11 +1,8 @@
 package com.jh.platform.controller;
 
-import com.jh.platform.controller.result.LoginResult;
 import com.jh.platform.controller.vo.LoginVO;
+import com.jh.platform.controller.vo.RegisterVO;
 import com.jh.platform.mapper.LogUserMapper;
-import com.jh.platform.model.User;
-import com.jh.platform.util.PasswordHelper;
-import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -14,11 +11,8 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
-import java.time.LocalDateTime;
-import java.time.LocalTime;
-import java.time.temporal.ChronoField;
-import java.util.Set;
-import java.util.concurrent.TimeUnit;
+import java.util.HashMap;
+import java.util.Map;
 
 /**
  * @author jianghong
@@ -40,7 +34,6 @@ public class LoginController extends BaseController {
 
     @Value("${client.max-num}")
     private int clientMaxNum = 3;
-
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
@@ -83,5 +76,25 @@ public class LoginController extends BaseController {
         loginResult.setData(user);
         return encryptResponseData(loginResult);
     }
+
+
+    /**
+     * register
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    public String register(HttpServletRequest request){
+        Map<String,Object> result = new HashMap<>();
+        RegisterVO registerVO = (RegisterVO) objectToVO(request.getAttribute("arg"), RegisterVO.class);
+
+
+
+
+        return encryptResponseData(result);
+    }
+
+
+
 
 }
