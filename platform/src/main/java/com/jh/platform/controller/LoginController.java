@@ -1,8 +1,14 @@
 package com.jh.platform.controller;
 
+import com.jh.platform.controller.result.LoginResult;
+import com.jh.platform.controller.vo.ChangePWVO;
+import com.jh.platform.controller.vo.HearBeat;
 import com.jh.platform.controller.vo.LoginVO;
 import com.jh.platform.controller.vo.RegisterVO;
 import com.jh.platform.mapper.LogUserMapper;
+import com.jh.platform.model.User;
+import com.jh.platform.util.PasswordHelper;
+import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -11,8 +17,13 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.LocalDateTime;
+import java.time.LocalTime;
+import java.time.temporal.ChronoField;
 import java.util.HashMap;
 import java.util.Map;
+import java.util.Set;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jianghong
@@ -83,14 +94,37 @@ public class LoginController extends BaseController {
      * @param request
      * @return
      */
-    @RequestMapping(value = "/register", method = RequestMethod.POST)
+    @RequestMapping(value = "/create", method = RequestMethod.POST)
     public String register(HttpServletRequest request){
         Map<String,Object> result = new HashMap<>();
         RegisterVO registerVO = (RegisterVO) objectToVO(request.getAttribute("arg"), RegisterVO.class);
+        return encryptResponseData(result);
+    }
+
+
+    /**
+     * change password
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/changepw", method = RequestMethod.POST)
+    public String changepw(HttpServletRequest request){
+        Map<String,Object> result = new HashMap<>();
+        ChangePWVO changePWVO = (ChangePWVO) objectToVO(request.getAttribute("arg"), ChangePWVO.class);
+        return encryptResponseData(result);
+    }
 
 
 
-
+    /**
+     * heart beat
+     * @param request
+     * @return
+     */
+    @RequestMapping(value = "/heartbeat", method = RequestMethod.POST)
+    public String heartbeat(HttpServletRequest request){
+        Map<String,Object> result = new HashMap<>();
+        HearBeat hearBeat = (HearBeat) objectToVO(request.getAttribute("arg"), HearBeat.class);
         return encryptResponseData(result);
     }
 
