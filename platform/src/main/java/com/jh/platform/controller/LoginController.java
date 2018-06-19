@@ -6,7 +6,7 @@ import com.jh.platform.controller.vo.ChangePWVO;
 import com.jh.platform.controller.vo.HearBeat;
 import com.jh.platform.controller.vo.LoginVO;
 import com.jh.platform.controller.vo.RegisterVO;
-import com.jh.platform.mapper.LogUserMapper;
+import com.jh.platform.mapper.UserMapper;
 import com.jh.platform.model.User;
 import com.jh.platform.util.PasswordHelper;
 import org.apache.commons.lang3.StringUtils;
@@ -36,7 +36,7 @@ import java.util.concurrent.TimeUnit;
 public class LoginController extends BaseController {
 
     @Autowired
-    private LogUserMapper logUserMapper;
+    private UserMapper logUserMapper;
 
     @Autowired
     private StringRedisTemplate template;

@@ -11,7 +11,7 @@ import org.apache.ibatis.annotations.Select;
  * @create 2018-06-01 16:25
  **/
 @Mapper
-public interface LogUserMapper {
+public interface UserMapper {
 
     @Select("SELECT * FROM yy_user WHERE usercode = #{usercode}")
     User findUserByName(@Param("usercode") String usercode);
