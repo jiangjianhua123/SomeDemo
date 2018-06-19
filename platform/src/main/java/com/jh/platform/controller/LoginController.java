@@ -60,7 +60,7 @@ public class LoginController extends BaseController {
             //return "超过当前账号客户端最大数";
             return encryptResponseData(loginResult);
         }
-        String tempKeyError = template.opsForValue().get("error-" +tempKey );
+        String tempKeyError = template.opsForValue().get(errorTempKey);
         if (StringUtils.isNotBlank(tempKeyError) && Integer.parseInt(tempKeyError) > oneDayErrorTimes) {
             //return "登陆失败次数过多，今天限制登陆。";
             loginResult.setResult("error");
@@ -113,6 +113,13 @@ public class LoginController extends BaseController {
         ChangePWVO changePWVO = (ChangePWVO) objectToVO(request.getAttribute("arg"), ChangePWVO.class);
         String errorTempKey = "changepw_"+ changePWVO.getUsercode();
         User user = logUserMapper.findUserByName(changePWVO.getUsercode());
+        String tempKeyError = template.opsForValue().get(errorTempKey);
+        if (StringUtils.isNotBlank(tempKeyError) && Integer.parseInt(tempKeyError) > oneDayErrorTimes) {
+            //return "登陆失败次数过多，今天限制登陆。";
+            result.setResult("error");
+            result.setCode(40007);
+            return encryptResponseData(result);
+        }
         //user or pass is wrong
         if (user == null || !StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(changePWVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
             result.setResult("error");
@@ -125,11 +132,12 @@ public class LoginController extends BaseController {
             template.expire(errorTempKey, (24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)),TimeUnit.SECONDS);
             return encryptResponseData(result);
         }
-
-
-
-
-
+        //
+        user.setPassword(changePWVO.getPassword());
+        PasswordHelper.encryptPassword(user);
+        logUserMapper.updateUser(user);
+        template.delete(errorTempKey);
+        result.setResult("success");
         return encryptResponseData(result);
     }
 
@@ -144,6 +152,8 @@ public class LoginController extends BaseController {
     public String heartbeat(HttpServletRequest request){
         Map<String,Object> result = new HashMap<>();
         HearBeat hearBeat = (HearBeat) objectToVO(request.getAttribute("arg"), HearBeat.class);
+
+
         return encryptResponseData(result);
     }
 
