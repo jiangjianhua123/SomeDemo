@@ -1,5 +1,6 @@
 package com.jh.platform.controller;
 
+import com.jh.platform.controller.result.ChangePWResult;
 import com.jh.platform.controller.result.LoginResult;
 import com.jh.platform.controller.vo.ChangePWVO;
 import com.jh.platform.controller.vo.HearBeat;
@@ -108,9 +109,27 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/changepw", method = RequestMethod.POST)
-    public String changepw(HttpServletRequest request){
-        Map<String,Object> result = new HashMap<>();
+    public String changepw(HttpServletRequest request, ChangePWResult result){
         ChangePWVO changePWVO = (ChangePWVO) objectToVO(request.getAttribute("arg"), ChangePWVO.class);
+        String errorTempKey = "changepw_"+ changePWVO.getUsercode();
+        User user = logUserMapper.findUserByName(changePWVO.getUsercode());
+        //user or pass is wrong
+        if (user == null || !StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(changePWVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
+            result.setResult("error");
+            result.setCode(40006);
+            if(StringUtils.isBlank(errorTempKey))   {
+                template.opsForValue().set(errorTempKey,"1");
+            }else {
+                template.opsForValue().increment(errorTempKey,1);
+            }
+            template.expire(errorTempKey, (24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)),TimeUnit.SECONDS);
+            return encryptResponseData(result);
+        }
+
+
+
+
+
         return encryptResponseData(result);
     }
 

@@ -16,4 +16,9 @@ public interface LogUserMapper {
     @Select("SELECT * FROM yy_user WHERE usercode = #{usercode}")
     User findUserByName(@Param("usercode") String usercode);
 
+
+    void updateUser(User user);
+
+
+
 }

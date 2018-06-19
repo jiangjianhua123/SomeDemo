@@ -5,7 +5,7 @@ package com.jh.platform.controller.result;
  * @Description
  * @create 2018-06-03 19:42
  **/
-public class BaseReslut {
+public class BaseResult {
 
     private String result;
 

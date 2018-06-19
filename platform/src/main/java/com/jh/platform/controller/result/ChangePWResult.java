@@ -3,9 +3,8 @@ package com.jh.platform.controller.result;
 /**
  * @author jianghong
  * @Description
- * @create 2018-06-03 17:58
+ * @create 2018-06-17 19:56
  **/
-public class LoginResult extends BaseResult {
-
+public class ChangePWResult extends BaseResult {
 
 }
