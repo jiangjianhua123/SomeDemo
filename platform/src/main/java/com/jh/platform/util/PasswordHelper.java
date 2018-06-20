@@ -20,17 +20,6 @@ public class PasswordHelper {
 	public static  String algorithmName = "md5";
 	public static  int hashIterations = 2;
 
-//	public static void setRandomNumberGenerator(RandomNumberGenerator randomNumberGenerator) {
-//		this.randomNumberGenerator = randomNumberGenerator;
-//	}
-
-//	public void setAlgorithmName(String algorithmName) {
-//		this.algorithmName = algorithmName;
-//	}
-//
-//	public void setHashIterations(int hashIterations) {
-//		this.hashIterations = hashIterations;
-//	}
 
 	/**
 	 * 设置后台用户密码
@@ -77,13 +66,4 @@ public class PasswordHelper {
 	}
 
 
-
-//	public static void main(String[] args) {
-//		PasswordHelper pHelper = new PasswordHelper();
-//		User user = new User();
-//		user.setUsercode("16666");
-//		user.setPassword("888888");
-//		pHelper.encryptPassword(user);
-//		System.err.println(user);
-//	}
 }

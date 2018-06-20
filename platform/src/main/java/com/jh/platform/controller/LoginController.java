@@ -1,5 +1,6 @@
 package com.jh.platform.controller;
 
+import com.jh.platform.common.Constant;
 import com.jh.platform.controller.result.ChangePWResult;
 import com.jh.platform.controller.result.LoginResult;
 import com.jh.platform.controller.vo.ChangePWVO;
@@ -18,6 +19,7 @@ import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
@@ -36,7 +38,7 @@ import java.util.concurrent.TimeUnit;
 public class LoginController extends BaseController {
 
     @Autowired
-    private UserMapper logUserMapper;
+    private UserMapper userMapper;
 
     @Autowired
     private StringRedisTemplate template;
@@ -50,9 +52,10 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
         LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
-        String tempKey = loginVO.getUsercode() + "-" + loginVO.getHardwareCode();
-        String errorTempKey = "error-" +tempKey;
-        Set<String> keySets = template.keys(loginVO.getUsercode() + "-*");
+        String tempKey = loginVO.getUsercode() + Constant.underline + loginVO.getHardwareCode();
+        String sucessTempKey = tempKey + Constant.underline + Clock.systemUTC().instant().getEpochSecond();
+        String errorTempKey = "error"+ Constant.underline +tempKey;
+        Set<String> keySets = template.keys(loginVO.getUsercode() + Constant.underline + "*");
         //超过当前账号客户端最大数
         if (!keySets.isEmpty()&&StringUtils.isBlank(keySets.stream().filter(k -> k.startsWith(tempKey)).findFirst().get()) && keySets.size() >= clientMaxNum) {
             loginResult.setResult("error");
@@ -67,7 +70,7 @@ public class LoginController extends BaseController {
             loginResult.setCode(40005);
             return encryptResponseData(loginResult);
         }
-        User user = logUserMapper.findUserByName(loginVO.getUsercode());
+        User user = userMapper.findUserByName(loginVO.getUsercode());
         //user or pass is wrong
         if (user == null || !StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
             loginResult.setResult("error");
@@ -80,9 +83,9 @@ public class LoginController extends BaseController {
             template.expire(errorTempKey, (24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)),TimeUnit.SECONDS);
             return encryptResponseData(loginResult);
         }
-        template.opsForHash().put(tempKey,"usercode",user.getUsercode());
-        template.opsForHash().put(tempKey,"logintime",LocalDateTime.now().toString());
-        template.expire(tempKey, 5, TimeUnit.MINUTES);
+        template.opsForHash().put(sucessTempKey,"usercode",user.getUsercode());
+        template.opsForHash().put(sucessTempKey,"logintime",LocalDateTime.now().toString());
+        template.expire(sucessTempKey, 5, TimeUnit.MINUTES);
         template.delete(errorTempKey);
         loginResult.setResult("success");
         loginResult.setData(user);
@@ -96,9 +99,12 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public String register(HttpServletRequest request){
+    public String register(HttpServletRequest request,User user){
         Map<String,Object> result = new HashMap<>();
         RegisterVO registerVO = (RegisterVO) objectToVO(request.getAttribute("arg"), RegisterVO.class);
+        user.setUsercode(registerVO.getUsercode());
+        user.setPassword(registerVO.getPassword());
+        PasswordHelper.encryptPassword(user);
         return encryptResponseData(result);
     }
 
@@ -111,8 +117,8 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/changepw", method = RequestMethod.POST)
     public String changepw(HttpServletRequest request, ChangePWResult result){
         ChangePWVO changePWVO = (ChangePWVO) objectToVO(request.getAttribute("arg"), ChangePWVO.class);
-        String errorTempKey = "changepw_"+ changePWVO.getUsercode();
-        User user = logUserMapper.findUserByName(changePWVO.getUsercode());
+        String errorTempKey = "changepw" + Constant.underline + changePWVO.getUsercode();
+        User user = userMapper.findUserByName(changePWVO.getUsercode());
         String tempKeyError = template.opsForValue().get(errorTempKey);
         if (StringUtils.isNotBlank(tempKeyError) && Integer.parseInt(tempKeyError) > oneDayErrorTimes) {
             //return "登陆失败次数过多，今天限制登陆。";
@@ -135,7 +141,7 @@ public class LoginController extends BaseController {
         //
         user.setPassword(changePWVO.getPassword());
         PasswordHelper.encryptPassword(user);
-        logUserMapper.updateUser(user);
+        userMapper.updateUser(user);
         template.delete(errorTempKey);
         result.setResult("success");
         return encryptResponseData(result);
@@ -152,8 +158,16 @@ public class LoginController extends BaseController {
     public String heartbeat(HttpServletRequest request){
         Map<String,Object> result = new HashMap<>();
         HearBeat hearBeat = (HearBeat) objectToVO(request.getAttribute("arg"), HearBeat.class);
-
-
+        String tempKey = hearBeat.getUsercode() + Constant.underline + hearBeat.getCode_Timestamps();
+        User user = new User();
+        //check has Object
+        if(template.opsForHash().hasKey(tempKey,user)){
+            //update expire time
+            template.expire(tempKey,5, TimeUnit.MINUTES);
+            result.put("result","success");
+        }else{
+            result.put("result","error");
+        }
         return encryptResponseData(result);
     }
 
