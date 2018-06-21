@@ -1,6 +1,6 @@
+import java.time.Clock;
 import java.time.LocalTime;
 import java.time.temporal.ChronoField;
-import java.time.temporal.ChronoUnit;
 
 /**
  * @author jianghong
@@ -42,9 +42,16 @@ public class StaticTest {
         System.err.println(24*60*60-LocalTime.now().getLong(ChronoField.SECOND_OF_DAY));
 
 
-        System.out.println(localTime.until(endLocalTime,ChronoUnit.HOURS));
+        System.out.println("aaa:"+Clock.systemUTC().millis());
 
 
+        System.err.println("_____________________________________");
+        //System.err.println(Clock.systemUTC().instant().getEpochSecond());
+
+        System.err.println("1.01.01.0001".matches("(\\d+\\.){3}\\d+"));
+        System.err.println("1.01.0190001".matches("(\\d+\\.){3}\\d+"));
+        System.err.println("1.01。01.0001".matches("(\\d+\\.){3}\\d+"));
+        System.err.println("1.01.01.0001".matches("(\\d+\\.){3}\\d+"));
 
     }
 
