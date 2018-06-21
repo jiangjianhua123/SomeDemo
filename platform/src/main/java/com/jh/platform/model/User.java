@@ -8,6 +8,9 @@ package com.jh.platform.model;
 public class User {
 
     private static final long serialVersionUID = 1L;
+
+    private long id;
+
     /**
      *  用户名（主持人使用YY号）
      */
@@ -46,9 +49,15 @@ public class User {
     private String alipay;
 
     /**
+     * 微信账号
+     */
+    private String weChat;
+
+    /**
      * 账号是否可用状态
      */
     private Boolean locked = Boolean.FALSE;
+
 
     public String getCredentialsSalt() {
         return usercode + salt;
@@ -128,5 +137,21 @@ public class User {
 
     public void setLocked(Boolean locked) {
         this.locked = locked;
+    }
+
+    public String getWeChat() {
+        return weChat;
+    }
+
+    public void setWeChat(String weChat) {
+        this.weChat = weChat;
+    }
+
+    public long getId() {
+        return id;
+    }
+
+    public void setId(long id) {
+        this.id = id;
     }
 }

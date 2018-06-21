@@ -8,4 +8,6 @@ package com.jh.platform.controller.result;
 public class LoginResult extends BaseResult {
 
 
+
+
 }
