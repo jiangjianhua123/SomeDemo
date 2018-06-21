@@ -27,6 +27,11 @@ public class RegisterVO extends BaseVO{
      */
     private String hardwareCode;
 
+    /**
+     * 客户端版本号
+     */
+    private String clientsVersion;
+
     public String getUsercode() {
         return usercode;
     }
@@ -57,5 +62,13 @@ public class RegisterVO extends BaseVO{
 
     public void setHardwareCode(String hardwareCode) {
         this.hardwareCode = hardwareCode;
+    }
+
+    public String getClientsVersion() {
+        return clientsVersion;
+    }
+
+    public void setClientsVersion(String clientsVersion) {
+        this.clientsVersion = clientsVersion;
     }
 }

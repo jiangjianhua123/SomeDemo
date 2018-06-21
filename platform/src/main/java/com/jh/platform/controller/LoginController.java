@@ -7,6 +7,7 @@ import com.jh.platform.controller.vo.ChangePWVO;
 import com.jh.platform.controller.vo.HearBeat;
 import com.jh.platform.controller.vo.LoginVO;
 import com.jh.platform.controller.vo.RegisterVO;
+import com.jh.platform.mapper.ClientInfoMapper;
 import com.jh.platform.mapper.UserMapper;
 import com.jh.platform.model.ClientInfo;
 import com.jh.platform.model.User;
@@ -16,11 +17,13 @@ import org.apache.commons.lang3.StringUtils;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
+import org.springframework.transaction.annotation.Transactional;
 import org.springframework.web.bind.annotation.RequestMapping;
 import org.springframework.web.bind.annotation.RequestMethod;
 import org.springframework.web.bind.annotation.RestController;
 
 import javax.servlet.http.HttpServletRequest;
+import java.sql.Timestamp;
 import java.time.Clock;
 import java.time.LocalDateTime;
 import java.time.LocalTime;
@@ -42,6 +45,9 @@ public class LoginController extends BaseController {
 
     @Autowired
     private UserMapper userMapper;
+
+    @Autowired
+    private ClientInfoMapper  clientInfoMapper;
 
     @Autowired
     private StringRedisTemplate template;
@@ -93,7 +99,7 @@ public class LoginController extends BaseController {
 
             return encryptResponseData(loginResult);
         }
-        List<ClientInfo> clientInfos = userMapper.findUserClientInfo(user.getUsercode());
+        List<ClientInfo> clientInfos = clientInfoMapper.findUserClientInfo(user.getUsercode());
         if (clientInfos.isEmpty()) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_NULL);
@@ -130,13 +136,34 @@ public class LoginController extends BaseController {
      * @return
      */
     @RequestMapping(value = "/create", method = RequestMethod.POST)
-    public String register(HttpServletRequest request, User user) {
+    public String register(HttpServletRequest request, User user,ClientInfo clientInfo) {
         Map<String, Object> result = new HashMap<>();
         RegisterVO registerVO = (RegisterVO) objectToVO(request.getAttribute("arg"), RegisterVO.class);
+
         user.setUsercode(registerVO.getUsercode());
         user.setPassword(registerVO.getPassword());
+        user.setWeChat(registerVO.getWeChat());
         PasswordHelper.encryptPassword(user);
+
+        clientInfo.setClient_version(registerVO.getClientsVersion());
+        clientInfo.setExpires(Timestamp.valueOf(LocalDateTime.now().plusMonths(1)));
+        try{
+            insertUserAndTime(user,clientInfo);
+            result.put("result", "success");
+            result.put("code", 0);
+        }catch (Exception e){
+            e.printStackTrace();
+            result.put("result", "error");
+            result.put("code", -1);
+        }
+
         return encryptResponseData(result);
+    }
+
+    @Transactional
+    void insertUserAndTime(User user, ClientInfo clientInfo){
+        userMapper.insertUser(user);
+        clientInfoMapper.insertClientInfo(clientInfo);
     }
 
 
@@ -196,8 +223,11 @@ public class LoginController extends BaseController {
             //update expire time
             template.expire(tempKey, 5, TimeUnit.MINUTES);
             result.put("result", "success");
+            result.put("code", 0);
+
         } else {
             result.put("result", "error");
+            result.put("code", -1);
         }
         return encryptResponseData(result);
     }
