@@ -98,7 +98,7 @@ public class LoginController extends BaseController {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_NULL);
         }
-        String[] clientVersionArrays = clientVersion.split(".");
+        String[] clientVersionArrays = clientVersion.split("\\.");
         ClientInfo clientInfo = clientInfos.stream().filter(c -> c.getClient_version().startsWith(clientVersionArrays[0])).findFirst().get();
         if (!StringUtils.equalsIgnoreCase(clientVersion.substring(0, clientVersion.lastIndexOf(".")), clientInfo.getClient_version().substring(0, clientVersion.lastIndexOf(".")))) {
             loginResult.setResult("error");
@@ -111,7 +111,6 @@ public class LoginController extends BaseController {
         }
         template.opsForHash().put(sucessTempKey, "usercode", user.getUsercode());
         template.opsForHash().put(sucessTempKey, "logintime", LocalDateTime.now().toString());
-        template.opsForHash().put(sucessTempKey, "timeleft", time);
         template.expire(sucessTempKey, 5, TimeUnit.MINUTES);
         template.delete(errorTempKey);
         loginResult.setResult("success");
