@@ -55,7 +55,9 @@ public class ConfigurationFilter {
         @Override
         public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)  {
             try{
-                byte[] decodedData = RSAUtils.decryptByPrivateKey(Base64Utils.decode(IOUtils.toByteArray(servletRequest.getInputStream())), RSAUtils.serverPrivateKey);
+                String str = IOUtils.toString(servletRequest.getInputStream());
+                LOG.info("接收数据：" + str);
+                byte[] decodedData = RSAUtils.decryptByPrivateKey(Base64Utils.decode(str.getBytes("utf-8")), RSAUtils.serverPrivateKey);
                 String decodedDataStr = new String(decodedData);
                 JSONObject res = JSONObject.parseObject(decodedDataStr);
                 String sign = res.getString("sign");
