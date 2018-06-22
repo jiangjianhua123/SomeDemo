@@ -62,17 +62,19 @@ public class ConfigurationFilter {
                 JSONObject res = JSONObject.parseObject(decodedDataStr);
                 String sign = res.getString("sign");
                 res.remove("sign");
+                LOG.info("sign数据：" + sign);
                 boolean status = RSAUtils.verify(res.toJSONString().getBytes(), RSAUtils.clientPublicKey, sign);
+                LOG.info("sign结果：" + status);
                 if(status){
                     servletRequest.setAttribute("arg",res);
                     filterChain.doFilter(servletRequest, servletResponse);
                 }else{
-                    servletResponse.getWriter().append("error");
+                    servletResponse.getWriter().append("发送数据格式不正确");
                     servletResponse.getWriter().flush();
                 }
             }catch (Exception e){
                 try {
-                    servletResponse.getWriter().append("error");
+                    servletResponse.getWriter().append(e.getMessage());
                     servletResponse.getWriter().flush();
                 } catch (IOException e1) {
                     e1.printStackTrace();
