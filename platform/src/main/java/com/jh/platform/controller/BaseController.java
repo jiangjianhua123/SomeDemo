@@ -35,11 +35,11 @@ public class BaseController {
     protected String encryptResponseData(Object o){
         try{
             String source = JSON.toJSONString(o);
-            String sign = RSAUtils.sign(source.getBytes(), RSAUtils.clientPrivateKey);
+            String sign = RSAUtils.sign(source.getBytes(), RSAUtils.serverPrivateKey);
             JSONObject jsonObject = JSON.parseObject(source);
             jsonObject.put("sign", sign);
             source = jsonObject.toJSONString();
-            return Base64Utils.encode(RSAUtils.encryptByPublicKey(source.getBytes(), RSAUtils.serverPublicKey));
+            return Base64Utils.encode(RSAUtils.encryptByPublicKey(source.getBytes(), RSAUtils.clientPublicKey));
         }catch (Exception e){
 
         }
