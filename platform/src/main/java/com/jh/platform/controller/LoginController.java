@@ -68,7 +68,7 @@ public class LoginController extends BaseController {
         }
         String tempKey = loginVO.getUsercode() + Constant.underline + loginVO.getHardwareCode();
         long timestamps =  Clock.systemUTC().millis();
-        String sucessTempKey = tempKey + Constant.underline + timestamps;
+        String successTempKey = tempKey + Constant.underline + timestamps;
         String errorTempKey = "error" + Constant.underline + tempKey;
         Set<String> keySets = template.keys(loginVO.getUsercode() + Constant.underline + "*");
         //超过当前账号客户端最大数
@@ -90,13 +90,12 @@ public class LoginController extends BaseController {
         if (user == null || !StringUtils.equalsIgnoreCase(PasswordHelper.decryptPassword(loginVO.getPassword(), user.getCredentialsSalt()), user.getPassword())) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_PWD_OR_NULL);
-            template.expire(errorTempKey, (24 * 60 * 60 - LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)), TimeUnit.SECONDS);
             if (StringUtils.isBlank(tempKeyError)) {
                 template.opsForValue().set(errorTempKey, "1");
             } else {
                 template.opsForValue().increment(errorTempKey, 1);
             }
-
+            template.expire(errorTempKey, (24 * 60 * 60 - LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)), TimeUnit.SECONDS);
             return encryptResponseData(loginResult);
         }
         List<ClientInfo> clientInfos = clientInfoMapper.findUserClientInfo(user.getUsercode());
@@ -115,13 +114,12 @@ public class LoginController extends BaseController {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_VERSION_OVER);
         }
-        template.opsForHash().put(sucessTempKey, "usercode", user.getUsercode());
-        template.opsForHash().put(sucessTempKey, "logintime", LocalDateTime.now().toString());
-        template.expire(sucessTempKey, 5, TimeUnit.MINUTES);
+        template.opsForHash().put(successTempKey, "usercode", user.getUsercode());
+        template.opsForHash().put(successTempKey, "logintime", LocalDateTime.now().toString());
+        template.expire(successTempKey, 5, TimeUnit.MINUTES);
         template.delete(errorTempKey);
         loginResult.setResult("success");
         Map<String,Object> dataMap = new HashMap<>();
-        //{"timeleft","3600","timestamps":"1528023800091"}
         dataMap.put("timeleft",time);
         dataMap.put("timestamps",timestamps);
         loginResult.setData(dataMap);
