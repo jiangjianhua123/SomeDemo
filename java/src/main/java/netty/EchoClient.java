@@ -9,6 +9,7 @@ import io.netty.channel.EventLoopGroup;
 import io.netty.channel.nio.NioEventLoopGroup;
 import io.netty.channel.socket.SocketChannel;
 import io.netty.channel.socket.nio.NioSocketChannel;
+import org.apache.commons.io.FileUtils;
 
 import java.io.ByteArrayOutputStream;
 import java.io.File;
@@ -95,21 +96,8 @@ public class EchoClient {
         message.setJsonStr(jsonStr);
         message.setJsonStrLeg(json_len);
         message.setContent_length(content_length);
-        message.setFile_byte(file2Byte(path.toFile()));
+        message.setFile_byte(FileUtils.readFileToByteArray(path.toFile()));
         channel.writeAndFlush(message);
-    }
-
-    public static byte[] file2Byte(File file) throws IOException {
-        FileInputStream fis = new FileInputStream(file);
-        ByteArrayOutputStream bos = new ByteArrayOutputStream();
-        int i;
-        byte[] b = new byte[1024];
-        while ((i = fis.read(b)) != -1) {
-            bos.write(b, 0, i);
-        }
-        fis.close();
-        bos.close();
-        return bos.toByteArray();
     }
 
     public static void main(String[] args) throws Exception {
