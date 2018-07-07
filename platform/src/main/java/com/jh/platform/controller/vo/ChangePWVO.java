@@ -25,7 +25,7 @@ public class ChangePWVO extends BaseVO{
     /**
      * 机器码_时间戳
      */
-    private String code_Timestamps;
+    private String hardwareCode;
 
     public String getUsercode() {
         return usercode;
@@ -51,11 +51,11 @@ public class ChangePWVO extends BaseVO{
         this.newPW = newPW;
     }
 
-    public String getCode_Timestamps() {
-        return code_Timestamps;
+    public String getHardwareCode() {
+        return hardwareCode;
     }
 
-    public void setCode_Timestamps(String code_Timestamps) {
-        this.code_Timestamps = code_Timestamps;
+    public void setHardwareCode(String hardwareCode) {
+        this.hardwareCode = hardwareCode;
     }
 }

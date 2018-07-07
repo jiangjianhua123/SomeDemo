@@ -66,7 +66,6 @@ public class EchoClient {
                     .handler(new ChannelInitializer<SocketChannel>() {
                         @Override
                         protected void initChannel(SocketChannel ch){
-                            System.out.println("正在连接中...");
                             ch.pipeline().addLast("encoder", new MessageDecoder());
                             ch.pipeline().addLast("decoder", new MessageEncoder());
                             ch.pipeline().addLast(new EchoClientHandler());

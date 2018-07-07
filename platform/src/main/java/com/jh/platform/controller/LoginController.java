@@ -1,5 +1,6 @@
 package com.jh.platform.controller;
 
+import com.alibaba.fastjson.JSON;
 import com.jh.platform.common.Constant;
 import com.jh.platform.controller.result.ChangePWResult;
 import com.jh.platform.controller.result.LoginResult;
@@ -14,6 +15,8 @@ import com.jh.platform.model.User;
 import com.jh.platform.util.ClientVersionUtil;
 import com.jh.platform.util.PasswordHelper;
 import org.apache.commons.lang3.StringUtils;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
 import org.springframework.beans.factory.annotation.Autowired;
 import org.springframework.beans.factory.annotation.Value;
 import org.springframework.data.redis.core.StringRedisTemplate;
@@ -43,6 +46,8 @@ import java.util.concurrent.TimeUnit;
 @RequestMapping("/yy/client")
 public class LoginController extends BaseController {
 
+    private static Logger LOG = LoggerFactory.getLogger(LoginController.class);
+
     @Autowired
     private UserMapper userMapper;
 
@@ -60,11 +65,21 @@ public class LoginController extends BaseController {
 
     @RequestMapping(value = "/login", method = RequestMethod.POST)
     public String login(HttpServletRequest request, LoginResult loginResult) {
-        LoginVO loginVO = (LoginVO) objectToVO(request.getAttribute("arg"), LoginVO.class);
+        LOG.info("login:"+request.getAttribute("arg"));
+        LoginVO loginVO = null;
+        try{
+            loginVO = JSON.parseObject((String)request.getAttribute("arg"), LoginVO.class);
+        }catch (Exception e){
+            e.printStackTrace();
+        }
+        if(loginVO==null){
+            loginResult.setResult("data format is wrong");
+        }
         String clientVersion = loginVO.getClientsVersion();
         if (!ClientVersionUtil.isVersion(clientVersion)) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_VERSION_ILLEGAL);
+            return encryptResponseData(loginResult);
         }
         String tempKey = loginVO.getUsercode() + Constant.underline + loginVO.getHardwareCode();
         long timestamps =  Clock.systemUTC().millis();
@@ -98,27 +113,31 @@ public class LoginController extends BaseController {
             template.expire(errorTempKey, (24 * 60 * 60 - LocalTime.now().getLong(ChronoField.SECOND_OF_DAY)), TimeUnit.SECONDS);
             return encryptResponseData(loginResult);
         }
+
         List<ClientInfo> clientInfos = clientInfoMapper.findUserClientInfo(user.getUsercode());
-        if (clientInfos.isEmpty()) {
+        if (clientInfos==null || clientInfos.isEmpty()) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_NULL);
+            return encryptResponseData(loginResult);
         }
         String[] clientVersionArrays = clientVersion.split("\\.");
         ClientInfo clientInfo = clientInfos.stream().filter(c -> c.getClient_version().startsWith(clientVersionArrays[0])).findFirst().get();
+
         if (!StringUtils.equalsIgnoreCase(clientVersion.substring(0, clientVersion.lastIndexOf(".")), clientInfo.getClient_version().substring(0, clientVersion.lastIndexOf(".")))) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_VERSION_UPDATE);
+            return encryptResponseData(loginResult);
         }
         long time = (clientInfo.getExpires().getTime() - Clock.systemUTC().millis()) / 1000;
         if (time <= 0) {
             loginResult.setResult("error");
             loginResult.setCode(Constant.USER_CLIENT_VERSION_OVER);
+            return encryptResponseData(loginResult);
         }
         template.opsForHash().put(successTempKey, "usercode", user.getUsercode());
         template.opsForHash().put(successTempKey, "logintime", LocalDateTime.now().toString());
         template.expire(successTempKey, 5, TimeUnit.MINUTES);
         template.delete(errorTempKey);
-        loginResult.setResult("success");
         Map<String,Object> dataMap = new HashMap<>();
         dataMap.put("timeleft",time);
         dataMap.put("timestamps",timestamps);
@@ -136,7 +155,7 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/create", method = RequestMethod.POST)
     public String register(HttpServletRequest request, User user,ClientInfo clientInfo) {
         Map<String, Object> result = new HashMap<>();
-        RegisterVO registerVO = (RegisterVO) objectToVO(request.getAttribute("arg"), RegisterVO.class);
+        RegisterVO registerVO = JSON.parseObject((String)request.getAttribute("arg"), RegisterVO.class);
 
         user.setUsercode(registerVO.getUsercode());
         user.setPassword(registerVO.getPassword());
@@ -173,7 +192,7 @@ public class LoginController extends BaseController {
      */
     @RequestMapping(value = "/changepw", method = RequestMethod.POST)
     public String changepw(HttpServletRequest request, ChangePWResult result) {
-        ChangePWVO changePWVO = (ChangePWVO) objectToVO(request.getAttribute("arg"), ChangePWVO.class);
+        ChangePWVO changePWVO = JSON.parseObject((String)request.getAttribute("arg"), ChangePWVO.class);
         String errorTempKey = "changepw" + Constant.underline + changePWVO.getUsercode();
         User user = userMapper.findUserByName(changePWVO.getUsercode());
         String tempKeyError = template.opsForValue().get(errorTempKey);
@@ -213,7 +232,7 @@ public class LoginController extends BaseController {
     @RequestMapping(value = "/heartbeat", method = RequestMethod.POST)
     public String heartbeat(HttpServletRequest request) {
         Map<String, Object> result = new HashMap<>();
-        HearBeat hearBeat = (HearBeat) objectToVO(request.getAttribute("arg"), HearBeat.class);
+        HearBeat hearBeat = JSON.parseObject((String)request.getAttribute("arg"), HearBeat.class);
         String tempKey = hearBeat.getUsercode() + Constant.underline + hearBeat.getCode_Timestamps();
         User user = new User();
         //check has Object

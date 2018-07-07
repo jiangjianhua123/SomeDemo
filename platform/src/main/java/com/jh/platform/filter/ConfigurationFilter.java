@@ -1,6 +1,5 @@
 package com.jh.platform.filter;
 
-import com.alibaba.fastjson.JSONObject;
 import com.jh.platform.util.Base64Utils;
 import com.jh.platform.util.RSAUtils;
 import org.apache.catalina.filters.RemoteIpFilter;
@@ -55,26 +54,29 @@ public class ConfigurationFilter {
         @Override
         public void doFilter(ServletRequest servletRequest, ServletResponse servletResponse, FilterChain filterChain)  {
             try{
-                String str = IOUtils.toString(servletRequest.getInputStream());
-                LOG.info("接收数据：" + str);
-                byte[] decodedData = RSAUtils.decryptByPrivateKey(Base64Utils.decode(str.getBytes("utf-8")), RSAUtils.serverPrivateKey);
+                byte[] decodedData = RSAUtils.decryptByPrivateKey(Base64Utils.decode(IOUtils.toByteArray(servletRequest.getInputStream())), RSAUtils.serverPrivateKey);
                 String decodedDataStr = new String(decodedData);
-                JSONObject res = JSONObject.parseObject(decodedDataStr);
-                String sign = res.getString("sign");
-                res.remove("sign");
-                LOG.info("sign数据：" + sign);
-                boolean status = RSAUtils.verify(res.toJSONString().getBytes(), RSAUtils.clientPublicKey, sign);
-                LOG.info("sign结果：" + status);
-                if(status){
-                    servletRequest.setAttribute("arg",res);
-                    filterChain.doFilter(servletRequest, servletResponse);
-                }else{
-                    servletResponse.getWriter().append("发送数据格式不正确");
-                    servletResponse.getWriter().flush();
-                }
+                LOG.info("decodedDataStr:"+decodedDataStr);
+//                JSONObject res = JSONObject.parseObject(decodedDataStr,Feature.IgnoreAutoType);
+//                LOG.info("JsonObject:"+res);
+                servletRequest.setAttribute("arg",decodedDataStr);
+                filterChain.doFilter(servletRequest, servletResponse);
+//                String sign = res.getString("sign");
+//                res.remove("sign");
+//                LOG.info("sign数据：" + sign);
+//                boolean status = RSAUtils.verify(JSONObject.toJSONString(res,true).getBytes(), RSAUtils.clientPublicKey, sign);
+//                LOG.info("sign结果：" + status);
+//                if(status){
+//                    servletRequest.setAttribute("arg",res);
+//                    filterChain.doFilter(servletRequest, servletResponse);
+//                }else{
+//                    servletResponse.getWriter().append("data format is wrong");
+//                    servletResponse.getWriter().flush();
+//                }
             }catch (Exception e){
                 try {
-                    servletResponse.getWriter().append(e.getMessage());
+                    LOG.error(e.getMessage());
+                    servletResponse.getWriter().append("data format is wrong");
                     servletResponse.getWriter().flush();
                 } catch (IOException e1) {
                     e1.printStackTrace();
