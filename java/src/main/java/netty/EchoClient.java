@@ -66,6 +66,7 @@ public class EchoClient {
                             ch.pipeline().addLast("encoder", new MessageDecoder());
                             ch.pipeline().addLast("decoder", new MessageEncoder());
                             ch.pipeline().addLast(new EchoClientHandler());
+                            //ch.pipeline().addLast(new MessageDecoder(),new EchoClientHandler(), new MessageEncoder());
                         }
                     });
             cf = b.connect().sync();
