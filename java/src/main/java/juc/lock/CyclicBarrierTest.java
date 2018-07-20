@@ -27,8 +27,6 @@ public class CyclicBarrierTest {
 
     public static void main(String[] args) throws InterruptedException {
         LOGGER.info(""+TimeUnit.SECONDS.toMillis(1));
-
-        OtherUtil.getOtherLog();
         for (int i = 0; i < parties; i++){
             new Thread(new Task()).start();
         }
@@ -42,10 +40,10 @@ public class CyclicBarrierTest {
         @Override
         public void run() {
             try {
-                System.out.println(Thread.currentThread().getName() + "await");
+                System.out.println(Thread.currentThread().getName() + " await");
                 // 在所有参与者都已经在此 barrier 上调用 await 方法之前，将一直等待。
                 barrier.await();
-                LOGGER.info(Thread.currentThread().getName() + "continued");
+                LOGGER.info(Thread.currentThread().getName() + " continued");
             } catch (BrokenBarrierException e) {
                 e.printStackTrace();
             } catch (InterruptedException e) {
