@@ -1,5 +1,7 @@
 import java.time.Clock;
-import java.util.concurrent.*;
+import java.util.concurrent.CopyOnWriteArrayList;
+import java.util.concurrent.LinkedBlockingDeque;
+import java.util.concurrent.TimeUnit;
 
 /**
  * @author jianghong
@@ -79,8 +81,12 @@ public class StaticTest {
         //System.err.println(features.get(features.size()).getId());
         System.err.println("over");
 
-//       int[] data = {1,3,5,10,5,2,345,8,12,99,4};
-//       basket(data);
+       int[] data = {1,3,5,10,5,2,345,8,12,99,4};
+       //basket(data);
+        int a=0,b=1;
+        boolean bl = a!=(a=b);
+        System.err.println(bl);
+
 
 
     }
