@@ -13,6 +13,8 @@ import util.OperatorUtil;
  **/
 public class EchoClientHandler extends SimpleChannelInboundHandler<Message> {
 
+
+
     @Override
     protected void channelRead0(ChannelHandlerContext channelHandlerContext, Message message) {
         byte[] temp = message.getFile_byte();

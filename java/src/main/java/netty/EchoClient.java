@@ -65,7 +65,7 @@ public class EchoClient {
                         protected void initChannel(SocketChannel ch){
                             ch.pipeline().addLast("encoder", new MessageDecoder());
                             ch.pipeline().addLast("decoder", new MessageEncoder());
-                            ch.pipeline().addLast(new EchoClientHandler());
+                            ch.pipeline().addLast(new CapClientHandler());
                         }
                     });
             cf = b.connect().sync();
@@ -84,7 +84,7 @@ public class EchoClient {
     private static void sendNodeMessage(Channel channel) throws Exception{
         //模拟发送对象
         Message message = new Message();
-        Path path = Paths.get("D:\\成都照片\\廖伟.jpg");
+        Path path = Paths.get("D:\\报名照片.jpg");
         int file_context_len = (int) path.toFile().length();
         String jsonStr = String.format("{\"MAX_RESULT\": %d, \"MIN_SCORE\": %f, \"LIBRARIES\": [], \"FILE_SOURCE_TYPE\": \"BINARY\",\"FILE_TYPE\": \"JPG\", \"FILE_LENGTH\": %d}", 10, 0.2, file_context_len);
         int json_len = jsonStr.length();
@@ -97,7 +97,8 @@ public class EchoClient {
     }
 
     public static void main(String[] args) throws Exception {
-        EchoClient client = new EchoClient("192.168.3.241", 9004);
+//        EchoClient client = new EchoClient("192.168.3.241", 9004);
+        EchoClient client = new EchoClient(8080);
         client.start();
 
     }
