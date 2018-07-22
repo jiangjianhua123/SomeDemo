@@ -1,5 +1,5 @@
-import java.util.concurrent.CopyOnWriteArrayList;
-import java.util.concurrent.LinkedBlockingDeque;
+import java.time.Clock;
+import java.util.concurrent.*;
 
 /**
  * @author jianghong
@@ -8,13 +8,18 @@ import java.util.concurrent.LinkedBlockingDeque;
  **/
 public class StaticTest {
 
-    public static int queue_capacity =2000000;
+    public static int queue_capacity =20000;
 
-    public static LinkedBlockingDeque<Features> features = new LinkedBlockingDeque<>(queue_capacity);
-    public static CopyOnWriteArrayList<Features> list = new CopyOnWriteArrayList<>();
+   public static CopyOnWriteArrayList<Features> features = new CopyOnWriteArrayList<Features>();
+
+    //public static ConcurrentLinkedQueue<Features> features = new ConcurrentLinkedQueue<Features>();
 
     public static void main(String[] args) throws Exception
     {
+        TimeUnit.SECONDS.sleep(10);
+
+
+
 //        List<Integer> listOfIntegers = IntStream.range(1,200000000).boxed().collect(Collectors.toList());
 //        List<Integer> parallelStorage = new ArrayList<>();//Collections.synchronizedList(new ArrayList<>());
 //        long starttimes = System.nanoTime();
@@ -56,31 +61,26 @@ public class StaticTest {
 //        System.err.println("1.01.0190001".matches("(\\d+\\.){3}\\d+"));
 //        System.err.println("1.01。01.0001".matches("(\\d+\\.){3}\\d+"));
 //        System.err.println("1.01.01.0001".matches("(\\d+\\.){3}\\d+"));
-//        Features f ;
-//        TimeUnit.SECONDS.sleep(10);
-//        long temp = queue_capacity*2;
-//        for(int i=0;i<temp;i++){
-//            f = new Features();
-//            f.setId(i);
-//            f.setCreateTime(Clock.systemUTC().millis());
-//            if(i>=queue_capacity){
-//                features.pollFirst();
-//
-//            }
-//            features.add(f);
-//        }
-//
-//        //Arrays.sort();
-//
-//        System.err.println("add is finish");
-//        System.err.println(features.peekFirst().getId());
-//        System.err.println(features.peekLast().getId());
-//        System.err.println("over");
+        Features f ;
+        System.err.println(Thread.currentThread().getName());
+        TimeUnit.SECONDS.sleep(10);
+        long temp = queue_capacity*2;
+        for(int i=0;i<temp;i++){
+            f = new Features();
+            f.setId(i);
+            f.setCreateTime(Clock.systemUTC().millis());
+            if(features.size()>queue_capacity){
+                features.remove(0);
+            }
+            features.add(f);
+        }
+        System.err.println("add is finish");
+        System.err.println(features.get(0).getId());
+        //System.err.println(features.get(features.size()).getId());
+        System.err.println("over");
 
-
-
-       int[] data = {1,3,5,10,5,2,345,8,12,99,4};
-       basket(data);
+//       int[] data = {1,3,5,10,5,2,345,8,12,99,4};
+//       basket(data);
 
 
     }
