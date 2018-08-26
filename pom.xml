@@ -72,6 +72,18 @@
             <version>2.4</version>
         </dependency>
 
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka-clients</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+
+        <dependency>
+            <groupId>org.apache.kafka</groupId>
+            <artifactId>kafka_2.11</artifactId>
+            <version>${kafka.version}</version>
+        </dependency>
+
 
     </dependencies>                                <!--项目当前版本,格式为:主版本.次版本.增量版本-限定版本号. -->
     <packaging>pom</packaging>										<!--项目产生的构件类型,例如jar,war,ear,pom.插件可以创建他们自己的构件类型,所以前面列的不是全部构件类型. -->
@@ -86,6 +98,8 @@
         <rocketmq.version>3.6.2.Final</rocketmq.version>
         <slf4j.version>1.7.2</slf4j.version>
         <log4j.version>1.2.17</log4j.version>
+        <kafka.version>2.0.0</kafka.version>
+
         <!-- environment version setting -->
         <jdk.version>1.8</jdk.version>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
@@ -95,20 +109,20 @@
     </properties>
 
     <!-- 设定主仓库，按设定顺序进行查找。 -->
-    <!--<repositories>-->
-        <!--<repository>-->
-            <!--<id>nexus-aliyun</id>-->
-            <!--<name>Nexus aliyun</name>-->
-            <!--<layout>default</layout>-->
-            <!--<url>http://maven.aliyun.com/nexus/content/groups/public</url>-->
-            <!--<snapshots>-->
-                <!--<enabled>false</enabled>-->
-            <!--</snapshots>-->
-            <!--<releases>-->
-                <!--<enabled>true</enabled>-->
-            <!--</releases>-->
-        <!--</repository>-->
-    <!--</repositories>-->
+    <repositories>
+        <repository>
+            <id>nexus-aliyun</id>
+            <name>Nexus aliyun</name>
+            <layout>default</layout>
+            <url>http://maven.aliyun.com/nexus/content/groups/public</url>
+            <snapshots>
+                <enabled>false</enabled>
+            </snapshots>
+            <releases>
+                <enabled>true</enabled>
+            </releases>
+        </repository>
+    </repositories>
 
     <!--&lt;!&ndash; 设定插件仓库 &ndash;&gt;-->
     <!--<pluginRepositories>-->
