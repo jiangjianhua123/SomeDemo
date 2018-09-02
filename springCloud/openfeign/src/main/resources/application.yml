@@ -1,0 +1,16 @@
+server:
+   port: 8766
+spring:
+  application:
+    name: fegin-service
+
+eureka:
+  client:
+    service-url:
+      defaultZone: http://discovery2:8762/eureka,http://discovery1:8761/eureka
+
+# To disable Hystrix in Feign
+feign:
+  hystrix:
+    enabled: false
+
